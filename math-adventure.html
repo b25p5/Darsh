@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math 4 Darsh! 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #1a1a2e;
+    --card: #0f3460;
+    --yellow: #f5a623;
+    --green: #4ecdc4;
+    --pink: #ff6b9d;
+    --blue: #45b7d1;
+    --red: #ff5e57;
+    --white: #fff;
+    --star: #ffe66d;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--sky);
+    min-height: 100vh;
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, white, transparent),
+      radial-gradient(1px 1px at 30% 5%, white, transparent),
+      radial-gradient(1px 1px at 50% 20%, white, transparent),
+      radial-gradient(1px 1px at 70% 10%, white, transparent),
+      radial-gradient(1px 1px at 90% 25%, white, transparent),
+      radial-gradient(1px 1px at 20% 40%, white, transparent),
+      radial-gradient(1px 1px at 60% 35%, white, transparent),
+      radial-gradient(1px 1px at 80% 45%, white, transparent),
+      radial-gradient(2px 2px at 15% 60%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(2px 2px at 45% 55%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(2px 2px at 75% 65%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 35% 80%, white, transparent),
+      radial-gradient(1px 1px at 55% 90%, white, transparent),
+      radial-gradient(1px 1px at 85% 75%, white, transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    text-align: center;
+    padding: 20px 0 10px;
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 8vw, 3rem);
+    color: var(--star);
+    text-shadow: 0 0 20px rgba(255,230,109,0.5), 3px 3px 0 rgba(0,0,0,0.3);
+  }
+  .header .subtitle {
+    font-size: 1rem;
+    color: var(--green);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .stats-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 12px 20px;
+    margin: 16px 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat { text-align: center; }
+  .stat-value {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+  .stat.stars .stat-value { color: var(--star); }
+  .stat.streak .stat-value { color: var(--pink); }
+  .stat.level .stat-value { color: var(--green); }
+
+  .progress-wrap {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    height: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .game-card {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border-radius: 28px;
+    padding: 28px 24px 24px;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    text-align: center;
+  }
+
+  /* Timer */
+  .timer-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .timer-ring {
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle.bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.1);
+    stroke-width: 5;
+  }
+  .timer-ring circle.fg {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 163;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.9s linear, stroke 0.3s;
+  }
+  .timer-ring circle.fg.urgent { stroke: var(--red); }
+  .timer-number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--white);
+  }
+
+  .strategy-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .mascot {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .hint-text {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+    min-height: 1.2em;
+    font-style: italic;
+  }
+
+  .question {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 11vw, 4rem);
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 24px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  }
+  .question .op { color: var(--yellow); }
+  .question .eq { color: var(--pink); }
+
+  .input-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .answer-input {
+    background: rgba(255,255,255,0.08);
+    border: 3px solid rgba(255,255,255,0.2);
+    border-radius: 18px;
+    padding: 14px 24px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.2rem;
+    color: var(--white);
+    text-align: center;
+    width: 180px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    caret-color: var(--yellow);
+  }
+  .answer-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(69,183,209,0.15);
+  }
+  .answer-input.correct-input {
+    border-color: var(--green);
+    box-shadow: 0 0 20px rgba(78,205,196,0.4);
+    animation: pulse-correct 0.5s ease;
+  }
+  .answer-input.wrong-input {
+    border-color: var(--red);
+    box-shadow: 0 0 20px rgba(255,94,87,0.4);
+    animation: shake 0.4s ease;
+  }
+  @keyframes pulse-correct {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  /* Numpad */
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+  .numpad-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 10px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .numpad-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+  .numpad-btn:active { transform: scale(0.96); }
+  .numpad-btn.del { color: var(--pink); font-size: 1rem; }
+  .numpad-btn.go {
+    background: linear-gradient(135deg, var(--green), #3ab8b0);
+    color: #1a1a2e;
+    font-size: 1rem;
+    grid-column: span 2;
+  }
+
+  .feedback {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-top: 6px;
+  }
+  .feedback.show-correct { color: var(--green); }
+  .feedback.show-wrong { color: var(--red); }
+
+  /* Overlay */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+  .overlay.active { display: flex; }
+  .overlay-card {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border: 2px solid var(--star);
+    border-radius: 30px;
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    box-shadow: 0 0 60px rgba(255,230,109,0.3);
+    animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .overlay-emoji { font-size: 4rem; margin-bottom: 12px; }
+  .overlay-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.2rem;
+    color: var(--star);
+    margin-bottom: 8px;
+  }
+  .overlay-subtitle { color: rgba(255,255,255,0.7); margin-bottom: 24px; font-size: 1rem; }
+  .overlay-btn {
+    background: linear-gradient(135deg, var(--yellow), #e8941a);
+    border: none;
+    border-radius: 50px;
+    padding: 14px 40px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: #1a1a2e;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(245,166,35,0.4);
+    transition: all 0.2s;
+  }
+  .overlay-btn:hover { transform: translateY(-3px); }
+
+  .particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 200;
+    border-radius: 50%;
+    animation: fall 1.2s ease-in forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>⭐ Math 4 Darsh!</h1>
+    <p class="subtitle">Train your math powers, Darsh! 🧠</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat stars">
+      <div class="stat-value" id="stars">0</div>
+      <div class="stat-label">⭐ Stars</div>
+    </div>
+    <div class="stat streak">
+      <div class="stat-value" id="streak">0</div>
+      <div class="stat-label">🔥 Streak</div>
+    </div>
+    <div class="stat level">
+      <div class="stat-value" id="level">1</div>
+      <div class="stat-label">🚀 Level</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress" style="width:0%"></div>
+  </div>
+
+  <div class="game-card">
+    <div class="timer-ring-wrap">
+      <div class="timer-ring">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle class="bg" cx="32" cy="32" r="26"/>
+          <circle class="fg" id="timer-circle" cx="32" cy="32" r="26"/>
+        </svg>
+        <div class="timer-number" id="timer-num">20</div>
+      </div>
+    </div>
+
+    <div class="strategy-badge" id="strategy-badge">Strategy</div>
+    <div class="mascot" id="mascot">🦄</div>
+    <div class="hint-text" id="hint-text"></div>
+    <div class="question" id="question">— + — = ?</div>
+
+    <div class="input-area">
+      <input
+        class="answer-input"
+        id="answer-input"
+        type="number"
+        inputmode="numeric"
+        placeholder="?"
+        autocomplete="off"
+      />
+      <div class="numpad">
+        <button class="numpad-btn" onclick="padPress('7')">7</button>
+        <button class="numpad-btn" onclick="padPress('8')">8</button>
+        <button class="numpad-btn" onclick="padPress('9')">9</button>
+        <button class="numpad-btn" onclick="padPress('4')">4</button>
+        <button class="numpad-btn" onclick="padPress('5')">5</button>
+        <button class="numpad-btn" onclick="padPress('6')">6</button>
+        <button class="numpad-btn" onclick="padPress('1')">1</button>
+        <button class="numpad-btn" onclick="padPress('2')">2</button>
+        <button class="numpad-btn" onclick="padPress('3')">3</button>
+        <button class="numpad-btn del" onclick="padDel()">⌫</button>
+        <button class="numpad-btn" onclick="padPress('0')">0</button>
+        <button class="numpad-btn go" onclick="submitAnswer()">✓ Go!</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <div class="overlay-emoji" id="overlay-emoji">🎉</div>
+    <div class="overlay-title" id="overlay-title">Level Up!</div>
+    <div class="overlay-subtitle" id="overlay-subtitle">You're amazing!</div>
+    <button class="overlay-btn" onclick="dismissOverlay()">Keep Going! 🚀</button>
+  </div>
+</div>
+
+<script>
+  const mascots = ['🦄','🐸','🦊','🐼','🦁','🐙','🦋','🐳','🦖','🐶'];
+  const correctPhrases = ['Great job! ⭐','Amazing! 🎉','You rock! 🔥','Fantastic! ✨','Brilliant! 💫','Superstar! 🌟'];
+  const wrongPhrases = ['Try again! 💪','Almost!','You can do it! 🌈',"Don't give up! 🤗"];
+
+  let stars = 0, streak = 0, level = 1, questionsInLevel = 0;
+  const questionsPerLevel = 5;
+  let currentAnswer = 0;
+  let locked = false;
+  let timerInterval = null;
+  let timeLeft = 20;
+
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // ── Strategies (2-digit, levels 1–3) ─────────────────────────────────────
+  const strategies2digit = [
+    {
+      name: 'Make a Ten',
+      hint: 'How many more to reach the next 10? 🎯',
+      gen() {
+        const a = rand(11, 49);
+        const gap = 10 - (a % 10) || 10;
+        const extra = rand(1, 9);
+        const b = gap + extra;
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Doubles',
+      hint: 'Double it! Same number twice 🎱🎱',
+      gen() {
+        const a = rand(11, 45);
+        return { a, b: a, answer: a * 2,
+          qHTML: `${a} <span class="op">+</span> ${a} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Near Doubles',
+      hint: 'Double the smaller, then add 1! 🎯',
+      gen() {
+        const a = rand(11, 44);
+        const b = a + 1;
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Add Tens',
+      hint: 'Just change the tens digit! 🔟',
+      gen() {
+        const a = rand(12, 69);
+        const b = rand(1, 3) * 10;
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Bridging Through 10',
+      hint: 'Jump to the next 10, then jump the rest! 🌉',
+      gen() {
+        const a = rand(13, 57);
+        const b = rand(5, 9);
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Count On',
+      hint: 'Start at the bigger number, count forward! 👉',
+      gen() {
+        const a = rand(20, 79);
+        const b = rand(1, 6);
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Subtract Tens',
+      hint: 'Just lower the tens digit! 🔻',
+      gen() {
+        const b = rand(1, 4) * 10;
+        const a = rand(b + 10, 99);
+        return { a, b, answer: a - b,
+          qHTML: `${a} <span class="op">−</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Count Back',
+      hint: 'Start at the bigger number, count backwards! 👈',
+      gen() {
+        const a = rand(20, 79);
+        const b = rand(1, 6);
+        return { a, b, answer: a - b,
+          qHTML: `${a} <span class="op">−</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Back Through 10',
+      hint: 'Jump back to the ten, then subtract the rest! ⬅️',
+      gen() {
+        const a = rand(21, 79);
+        const ones = a % 10;
+        const extra = rand(1, 5);
+        const b = ones + extra;
+        return { a, b, answer: a - b,
+          qHTML: `${a} <span class="op">−</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+  ];
+
+  // ── Strategies (3-digit, levels 4+) ──────────────────────────────────────
+  const strategies3digit = [
+    {
+      name: 'Add Hundreds',
+      hint: 'Just change the hundreds digit! 💯',
+      gen() {
+        const a = rand(100, 699);
+        const b = rand(1, 3) * 100;
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Split Strategy',
+      hint: 'Split into hundreds + tens + ones, add each part! 🧩',
+      gen() {
+        const a = rand(100, 499);
+        const b = rand(100, 400);
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Jump Strategy',
+      hint: 'Jump by hundreds first, then by tens! 🦘',
+      gen() {
+        const a = rand(102, 599);
+        const b = rand(101, 200);
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Compensate & Add',
+      hint: 'Round up to a nice number, then take away the extra! ⚖️',
+      gen() {
+        const a = rand(150, 699);
+        const roundTo = rand(1, 4) * 100;
+        const extra = rand(1, 9);
+        const b = roundTo - extra;
+        return { a, b, answer: a + b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Subtract Hundreds',
+      hint: 'Just lower the hundreds digit! 🔻',
+      gen() {
+        const sub = rand(1, 3) * 100;
+        const a = rand(sub + 100, 999);
+        return { a, b: sub, answer: a - sub,
+          qHTML: `${a} <span class="op">−</span> ${sub} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Compensate & Subtract',
+      hint: 'Round the number you are taking away, then adjust! ⚖️',
+      gen() {
+        const a = rand(350, 900);
+        const roundTo = rand(1, 3) * 100;
+        const extra = rand(1, 9);
+        const b = roundTo - extra;
+        if (a - b < 0) return strategies3digit[4].gen();
+        return { a, b, answer: a - b,
+          qHTML: `${a} <span class="op">−</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+    {
+      name: 'Place Value Add',
+      hint: 'Think: hundreds + hundreds, tens + tens, ones + ones!',
+      gen() {
+        const h1 = rand(1,4)*100, t1 = rand(1,8)*10, o1 = rand(1,9);
+        const h2 = rand(1,3)*100, t2 = rand(1,5)*10, o2 = rand(1,9);
+        const a = h1+t1+o1, b = h2+t2+o2;
+        return { a, b, answer: a+b,
+          qHTML: `${a} <span class="op">+</span> ${b} <span class="eq">=</span> ?` };
+      }
+    },
+  ];
+
+  function getStrategies() {
+    return level < 4 ? strategies2digit : strategies3digit;
+  }
+
+  // ── Question generation ───────────────────────────────────────────────────
+  function genQuestion() {
+    locked = false;
+    clearTimer();
+
+    const strategies = getStrategies();
+    let strat, q;
+    // pick random strategy, retry once on error
+    strat = strategies[Math.floor(Math.random() * strategies.length)];
+    try { q = strat.gen(); } catch(e) { q = strat.gen(); }
+
+    currentAnswer = q.answer;
+    document.getElementById('strategy-badge').textContent = strat.name;
+    document.getElementById('hint-text').textContent = strat.hint;
+    document.getElementById('question').innerHTML = q.qHTML;
+    document.getElementById('mascot').textContent = mascots[Math.floor(Math.random() * mascots.length)];
+
+    const inp = document.getElementById('answer-input');
+    inp.value = '';
+    inp.className = 'answer-input';
+    inp.disabled = false;
+    inp.focus();
+
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+
+    startTimer();
+  }
+
+  // ── Timer ─────────────────────────────────────────────────────────────────
+  const CIRC = 2 * Math.PI * 26; // ≈163.4
+
+  function startTimer() {
+    timeLeft = 20;
+    updateTimerUI();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimerUI();
+      if (timeLeft <= 0) { clearInterval(timerInterval); timerInterval = null; timeExpired(); }
+    }, 1000);
+  }
+
+  function clearTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function updateTimerUI() {
+    const circle = document.getElementById('timer-circle');
+    const numEl  = document.getElementById('timer-num');
+    circle.style.strokeDashoffset = CIRC * (1 - timeLeft / 20);
+    numEl.textContent = timeLeft;
+    if (timeLeft <= 5) {
+      circle.classList.add('urgent');
+      numEl.style.color = 'var(--red)';
+    } else {
+      circle.classList.remove('urgent');
+      numEl.style.color = 'var(--white)';
+    }
+  }
+
+  function timeExpired() {
+    if (locked) return;
+    locked = true;
+    streak = 0;
+    document.getElementById('streak').textContent = 0;
+    const fb = document.getElementById('feedback');
+    fb.textContent = `⏰ Time's up! Answer was ${currentAnswer}`;
+    fb.className = 'feedback show-wrong';
+    document.getElementById('answer-input').disabled = true;
+    setTimeout(genQuestion, 1800);
+  }
+
+  // ── Answer submit ─────────────────────────────────────────────────────────
+  function submitAnswer() {
+    if (locked) return;
+    const inp = document.getElementById('answer-input');
+    const val = parseInt(inp.value, 10);
+    if (isNaN(val)) { inp.focus(); return; }
+
+    locked = true;
+    clearTimer();
+    inp.disabled = true;
+
+    const fb = document.getElementById('feedback');
+
+    if (val === currentAnswer) {
+      inp.classList.add('correct-input');
+      const bonus = streak >= 3 ? 2 : 1;
+      stars += bonus;
+      streak++;
+      questionsInLevel++;
+      document.getElementById('stars').textContent = stars;
+      document.getElementById('streak').textContent = streak;
+      fb.textContent = correctPhrases[Math.floor(Math.random() * correctPhrases.length)] + (bonus === 2 ? ' +2 🔥' : '');
+      fb.className = 'feedback show-correct';
+      spawnConfetti();
+      updateProgress();
+      if (questionsInLevel >= questionsPerLevel) setTimeout(showLevelUp, 700);
+      else setTimeout(genQuestion, 1000);
+    } else {
+      inp.classList.add('wrong-input');
+      streak = 0;
+      document.getElementById('streak').textContent = 0;
+      fb.textContent = `${wrongPhrases[Math.floor(Math.random() * wrongPhrases.length)]} Answer: ${currentAnswer}`;
+      fb.className = 'feedback show-wrong';
+      setTimeout(genQuestion, 1600);
+    }
+  }
+
+  // ── Numpad ────────────────────────────────────────────────────────────────
+  function padPress(digit) {
+    if (locked) return;
+    const inp = document.getElementById('answer-input');
+    const cur = inp.value;
+    if (cur.length < 4) inp.value = cur + digit;
+    inp.focus();
+  }
+  function padDel() {
+    if (locked) return;
+    const inp = document.getElementById('answer-input');
+    inp.value = inp.value.slice(0, -1);
+    inp.focus();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitAnswer();
+  });
+
+  // ── Progress & Level Up ───────────────────────────────────────────────────
+  function updateProgress() {
+    document.getElementById('progress').style.width = (questionsInLevel / questionsPerLevel * 100) + '%';
+  }
+
+  function showLevelUp() {
+    level++;
+    questionsInLevel = 0;
+    document.getElementById('level').textContent = level;
+    document.getElementById('progress').style.width = '0%';
+    const emojis = ['🎉','🏆','🚀','🌟','👑','🦸','🧠','💎'];
+    document.getElementById('overlay-emoji').textContent = emojis[Math.min(level - 2, emojis.length - 1)];
+    document.getElementById('overlay-title').textContent = `Level ${level}! 🎉`;
+    const msgs = [
+      "You're a math star, Darsh! Keep going!",
+      "Amazing work! Getting harder now! 💪",
+      "Wow! 3-digit numbers start now! 🚀",
+      "You're a maths genius, Darsh! 🧠",
+      "Absolutely incredible! Keep it up! 💎",
+    ];
+    document.getElementById('overlay-subtitle').textContent = msgs[Math.min(level - 2, msgs.length - 1)];
+    document.getElementById('overlay').classList.add('active');
+    spawnConfetti(30);
+  }
+
+  function dismissOverlay() {
+    document.getElementById('overlay').classList.remove('active');
+    genQuestion();
+  }
+
+  // ── Confetti ──────────────────────────────────────────────────────────────
+  function spawnConfetti(count = 12) {
+    const colors = ['#f5a623','#4ecdc4','#ff6b9d','#45b7d1','#ffe66d','#a29bfe'];
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `left:${Math.random()*100}vw;top:-20px;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${0.8+Math.random()*0.8}s;animation-delay:${Math.random()*0.3}s;`;
+        document.body.appendChild(p);
+        p.addEventListener('animationend', () => p.remove());
+      }, i * 40);
+    }
+  }
+
+  // Start!
+  genQuestion();
+</script>
+</body>
+</html>
